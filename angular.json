@@ -23,6 +23,9 @@
               "src/assets"
             ],
             "styles": [
+              {
+                "input": "node_modules/@angular/material/prebuilt-themes/indigo-pink.css"
+              },
               "src/styles.css"
             ],
             "scripts": []
@@ -72,6 +75,9 @@
             "tsConfig": "src/tsconfig.spec.json",
             "karmaConfig": "src/karma.conf.js",
             "styles": [
+              {
+                "input": "node_modules/@angular/material/prebuilt-themes/indigo-pink.css"
+              },
               "src/styles.css"
             ],
             "scripts": [],
@@ -110,6 +116,46 @@
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
             "tsConfig": "e2e/tsconfig.e2e.json",
+            "exclude": [
+              "**/node_modules/**"
+            ]
+          }
+        }
+      }
+    },
+    "typeahead": {
+      "root": "projects/typeahead",
+      "sourceRoot": "projects/typeahead/src",
+      "projectType": "library",
+      "prefix": "ta",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-ng-packagr:build",
+          "options": {
+            "tsConfig": "projects/typeahead/tsconfig.lib.json",
+            "project": "projects/typeahead/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "project": "projects/typeahead/ng-package.prod.json"
+            }
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "projects/typeahead/src/test.ts",
+            "tsConfig": "projects/typeahead/tsconfig.spec.json",
+            "karmaConfig": "projects/typeahead/karma.conf.js"
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "projects/typeahead/tsconfig.lib.json",
+              "projects/typeahead/tsconfig.spec.json"
+            ],
             "exclude": [
               "**/node_modules/**"
             ]
