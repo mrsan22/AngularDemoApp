@@ -4,4 +4,5 @@
 
 export * from './lib/typeahead.service';
 export * from './lib/typeahead.component';
+export * from './lib/typeahead.directive';
 export * from './lib/typeahead.module';

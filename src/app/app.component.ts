@@ -16,4 +16,9 @@ export class AppComponent implements OnInit {
   ngOnInit() {
     this.appService.getCountries().subscribe(data => (this.countries = data));
   }
+
+  getFilteredSuggestions(dataLst: Array<string>) {
+    console.log('datalst', dataLst);
+    this.countries = [...dataLst];
+  }
 }

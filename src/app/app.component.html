@@ -1,6 +1,7 @@
 <h3>Typeahead demo app using Angular Material</h3>
 <mat-form-field>
-  <input matInput formControlName="country" [matAutocomplete]="countryAuto" placeholder="Choose Country">
+  <input matInput typeahead (result)="getFilteredSuggestions($event)" formControlName="country" [matAutocomplete]="countryAuto"
+    placeholder="Choose Country">
   <mat-autocomplete #countryAuto="matAutocomplete">
     <mat-option *ngFor="let country of countries" [value]="country">
       {{country}}
