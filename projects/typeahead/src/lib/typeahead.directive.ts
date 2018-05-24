@@ -1,16 +1,25 @@
-import { Directive, HostListener, OnInit, Output, EventEmitter } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { debounceTime, distinctUntilChanged, map, switchMap } from 'rxjs/operators';
+import { Directive, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { Observable, Subscription, of } from 'rxjs';
+import { debounceTime, distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
 import { TypeaheadService } from './typeahead.service';
 
 @Directive({
   selector: '[typeahead]'
 })
-export class TypeaheadDirective implements OnInit {
-  @Output() result = new EventEmitter<Array<string>>();
-  constructor(private typeAheadService: TypeaheadService) {
-    // this.typeAheadService.onKeyUp$.subscribe((event: KeyboardEvent) => this.showDataList(event));
-  }
+export class TypeaheadDirective implements OnInit, OnDestroy {
+  @Input() delayTime = 400;
+  @Input() apiURL: string;
+  @Input() urlParams: object = {};
+  @Input() urlQueryParam = 'query';
+  @Input() apiMethod = 'get';
+  @Input() apiType = 'http';
+  @Input() dataList: Array<any> = [];
+  @Input() callbackFuncName: string;
+  @Output() filteredDataList = new EventEmitter<Array<string>>();
+
+  keyUpSub: Subscription;
+
+  constructor(private typeAheadService: TypeaheadService) {}
 
   @HostListener('keydown', ['$event'])
   handleEsc(event: KeyboardEvent) {
@@ -34,17 +43,52 @@ export class TypeaheadDirective implements OnInit {
   }
 
   showDataList() {
-    // this.typeAheadService.onKeyUp$.subscribe(data => console.log('Event', data));
-    this.typeAheadService.onKeyUp$
+    this.keyUpSub = this.typeAheadService.onKeyUp$
       .pipe(
-        debounceTime(400),
+        filter((e: KeyboardEvent) => this.typeAheadService.validateNonCharKeyCode(e.keyCode)),
+        map(this.extractFormValue),
+        filter(this.emptyString),
+        debounceTime(this.delayTime),
         distinctUntilChanged(),
-        map(event => event['target']['value']),
         switchMap((searchTerm: string): Observable<Array<string>> => of(['United States']))
+        // switchMap((searchTerm: string): Observable<Array<any>> => this.filterData(searchTerm))
       )
-      .subscribe(data => {
-        console.log(data);
-        this.result.emit(data);
+      .subscribe((filteredList: Array<string>) => {
+        console.log(filteredList);
+        this.filteredDataList.emit(filteredList);
       });
+  }
+
+  ngOnDestroy() {
+    this.keyUpSub.unsubscribe();
+  }
+
+  private filterData(searchTerm: string): Observable<Array<any>> {
+    return this.dataList.length
+      ? this.filterListSource(this.dataList, searchTerm)
+      : this.typeAheadService.makeApiRequest(
+          searchTerm,
+          this.apiURL,
+          this.urlQueryParam,
+          this.urlParams,
+          this.apiMethod,
+          this.apiType,
+          this.callbackFuncName
+        );
+  }
+
+  private filterListSource(list: Array<any>, query: string): Observable<Array<string>> {
+    return of(list.filter((item: string) => item.includes(query)));
+  }
+
+  /**
+   * Extract the characters typed in the input of the typeahead component.
+   */
+  private extractFormValue(event: KeyboardEvent): string {
+    return event['target']['value'];
+  }
+
+  private emptyString(inputSearchTerm: string): boolean {
+    return inputSearchTerm.length > 0;
   }
 }
