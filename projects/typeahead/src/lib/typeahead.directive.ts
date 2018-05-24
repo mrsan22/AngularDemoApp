@@ -7,7 +7,7 @@ import { TypeaheadService } from './typeahead.service';
   selector: '[typeahead]'
 })
 export class TypeaheadDirective implements OnInit, OnDestroy {
-  @Input() delayTime = 400;
+  @Input() delayTime = 300;
   @Input() apiURL: string;
   @Input() urlParams: object = {};
   @Input() urlQueryParam = 'query';
@@ -15,9 +15,10 @@ export class TypeaheadDirective implements OnInit, OnDestroy {
   @Input() apiType = 'http';
   @Input() dataList: Array<any> = [];
   @Input() callbackFuncName: string;
+  @Input() allowEmptyString = true;
   @Output() filteredDataList = new EventEmitter<Array<string>>();
 
-  keyUpSub: Subscription;
+  private keyUpSub: Subscription;
 
   constructor(private typeAheadService: TypeaheadService) {}
 
@@ -47,11 +48,11 @@ export class TypeaheadDirective implements OnInit, OnDestroy {
       .pipe(
         filter((e: KeyboardEvent) => this.typeAheadService.validateNonCharKeyCode(e.keyCode)),
         map(this.extractFormValue),
-        filter(this.emptyString),
         debounceTime(this.delayTime),
         distinctUntilChanged(),
-        switchMap((searchTerm: string): Observable<Array<string>> => of(['United States']))
+        filter((searchTerm: string) => this.allowEmptyString || this.emptyString(searchTerm)),
         // switchMap((searchTerm: string): Observable<Array<any>> => this.filterData(searchTerm))
+        switchMap((searchTerm: string): Observable<Array<any>> => of(['United States']))
       )
       .subscribe((filteredList: Array<string>) => {
         console.log(filteredList);

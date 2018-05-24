@@ -38,10 +38,6 @@ export class TypeaheadService {
     );
   }
 
-  isEnterKey(event: KeyboardEvent): boolean {
-    return event.keyCode === Key.Enter;
-  }
-
   isEscapeKey(event: KeyboardEvent): boolean {
     return event.keyCode === Key.Escape;
   }
@@ -64,13 +60,12 @@ export class TypeaheadService {
 
   private configureParams(searchTerm: string, urlQueryParam: string, urlParams: object): HttpParams {
     const searchParams = {
-      urlQueryParam: searchTerm,
+      [urlQueryParam]: searchTerm,
       ...urlParams
     };
-
     let Params = new HttpParams();
     for (const eachKey of Object.keys(searchParams)) {
-      Params = Params.append(eachKey, searchParams['eachkey']);
+      Params = Params.append(eachKey, searchParams[eachKey]);
     }
     return Params;
   }
@@ -81,7 +76,7 @@ export class TypeaheadService {
   }
 
   private requestHttpCall(url: string, validApiMethod: string, options: { params: HttpParams }): Observable<any> {
-    return this.http['validApiMethod'](url, options);
+    return this.http[validApiMethod](url, options);
   }
 
   private requestJsonpCall(

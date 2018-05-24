@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { FormControl, FormGroup } from '@angular/forms';
 import { AppService } from './app.service';
 
 @Component({
@@ -10,11 +10,12 @@ import { AppService } from './app.service';
 export class AppComponent implements OnInit {
   constructor(private appService: AppService) {}
 
-  country = new FormControl('');
+  // country = new FormControl('');
+  testGroup: FormGroup = new FormGroup({ country: new FormControl('') });
   countries: Array<string> = [];
 
   ngOnInit() {
-    this.appService.getCountries().subscribe(data => (this.countries = data));
+    // this.appService.getCountries().subscribe(data => (this.countries = data));
   }
 
   getFilteredSuggestions(dataLst: Array<string>) {
